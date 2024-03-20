@@ -1,0 +1,326 @@
+#! /bin/csh -f
+# $1 = Target Experiment
+
+clear
+echo
+echo ' -------------------------------------------------------------------------------'
+echo '                          NASA/GMAO GEOS GCM                                    '
+echo '                            MODEXP Utility                                      '
+echo ' -------------------------------------------------------------------------------'
+echo
+                                                                                                                                   
+
+if ( ! $?CVSROOT | ! $?CVS_RSH ) then
+      echo " "
+      echo "Environment variables CVSROOT and CVS_RSH must be defined before use\!"
+      echo " "
+      echo "  setenv CVS_RSH ssh"
+      echo "  setenv CVSROOT :ext:USRID@progress.nccs.nasa.gov:/cvsroot/esma"
+      echo "             (or :ext:USRID@tunnel:/cvsroot/esma)"
+      echo " "
+      echo "  where USRID is your USRID on progress.nccs.nasa.gov"
+      echo " "
+      exit 1
+endif
+
+# SET EXPERIMENT
+# --------------
+if( .$1 == . ) then
+echo "Enter the Experiment ID to modify:"
+set EXPID = $<
+else
+set EXPID = $1
+endif
+
+# Check if Experiment exists
+# --------------------------
+if( ! -e $EXPID ) then
+    echo "Experiment ID:  $EXPID  does not exist\!"
+    exit 1
+else
+    set OWNER = `stat -c %U $EXPID`
+    if( $LOGNAME != takacs & $LOGNAME != $OWNER ) then
+    echo "Experiment ID:  $EXPID  is owned by $OWNER\!"
+    exit 1
+    endif
+endif
+
+##############################################################
+#               Check-out Web Pages from CVS
+##############################################################
+
+       set  TEMPDIR = ${LOGNAME}_`date +%m_%d_%Y_%H:%M:%S`
+mkdir   -p $TEMPDIR
+/bin/rm -f $TEMPDIR/*
+
+set list_type = "intranet"
+set lists     = `echo ${list_type}_ana_list ${list_type}_cli_list ${list_type}_list ${list_type}_rep_list`
+
+cvs co -d $TEMPDIR GEOS_Web/exp_item.template
+    cd    $TEMPDIR
+    cvs upd -r BRANCH_GEOSWEB_LISTS $lists
+    foreach list ($lists)
+       set check = `/usr/bin/diff $list ../$list`
+       if( $status != 0 )   /bin/cp -f  ../$list .
+    end
+    echo " "
+
+##############################################################
+#                   Check OLD Status
+##############################################################
+
+MODIFICATION:
+# -----------
+set list = ${list_type}_list
+                                        /bin/rm -f new_exp_item
+                                        /bin/rm -f old_exp_item
+                     grep "<a-- ${EXPID}>" $list > old_exp_item
+set old_exp_item  = `grep "<a-- ${EXPID}>" $list`
+
+   set OLD_EXPID  = `echo "$old_exp_item" | cut -d'>' -f1  | cut -b6-`
+   set     color  = `echo "$old_exp_item" | cut -d'>' -f5  | cut -d'=' -f2`
+   set     IDNAME = `echo "$old_exp_item" | cut -d'>' -f12 | cut -d'=' -f3`
+   set OLD_RSLV   = `echo "$old_exp_item" | cut -d'>' -f18 | cut -d'=' -f3`
+   set     date   = `echo "$old_exp_item" | cut -d'>' -f22 | cut -d'<' -f1`
+   set OLD_CNTL   = `echo "$old_exp_item" | cut -d'>' -f24 | cut -d'=' -f2`
+   set OLD_DESC   = `echo "$old_exp_item" | cut -d'>' -f32 | cut -d'<' -f1`
+   set OLD_ACCESS = `echo "$old_exp_item" | cut -d'>' -f34 | cut -d'=' -f2 | cut -d' ' -f1`
+   set OLD_KEYS   = `echo "$old_exp_item" | cut -d'>' -f34 | cut -d'=' -f3`
+
+   if( $#OLD_KEYS != 0 ) then
+       @   LENGTH_OLD_KEYS = `printf "%s" "$OLD_KEYS" | wc -c` - 4
+              set OLD_KEYS = `echo        "$OLD_KEYS" | cut -b-$LENGTH_OLD_KEYS`
+   else
+              set OLD_KEYS = ""
+   endif
+
+echo
+echo "Enter the Modification Code you wish to make for Experiment: $EXPID"
+echo "-----------------------------------------------------------"
+echo "      1 : Change the Experiment Description          (Current: $OLD_DESC)"
+echo "      2 : Change the Experiment Resolution           (Current: $OLD_RSLV)"
+echo "      3 : Change the Experiment Control              (Current: $OLD_CNTL)"
+echo "      4 : Change the Experiment Public/Private Code  (Current: $OLD_ACCESS)"
+echo "      5 : Add        Experiment Keywords             (Current: $OLD_KEYS)"
+echo "      6 : Delete the Experiment "
+echo "      7 : Commit the Experiment Updates"
+echo "      0 : Exit without Commit"
+
+set   code  = $<
+if( .$code == . ) goto MODIFICATION
+
+if(  $code != 1 & \
+     $code != 2 & \
+     $code != 3 & \
+     $code != 4 & \
+     $code != 5 & \
+     $code != 6 & \
+     $code != 7 & \
+     $code != 0 ) goto MODIFICATION
+echo
+
+if(  $code == 1 ) set code = desc
+if(  $code == 2 ) set code = rslv
+if(  $code == 3 ) set code = cntl
+if(  $code == 4 ) set code = access
+if(  $code == 5 ) set code = keys
+if(  $code == 6 ) set code = delete
+if(  $code == 7 ) set code = commit
+if(  $code == 0 ) set code = exit
+
+if(  $code == commit ) goto COMMIT
+if(  $code == exit   ) goto EXIT
+
+# Set CODE Defaults
+# -----------------
+set desc     = NULL
+set rslv     = NULL
+set cntl     = NULL
+set delete   = NULL
+set access   = NULL
+set keys     = NULL
+
+DESCRIPTION:
+# ----------
+if( $code == desc ) then
+echo "Enter a New Description for Experiment: $EXPID"
+set    EXPTMP   =  `echo $<`
+if( ."$EXPTMP" != . ) then
+    set desc =  $EXPTMP[1]
+    foreach WORD ($EXPTMP)
+    if( "$WORD" != "$desc" ) set desc = `echo ${desc} ${WORD}`
+    end
+else
+    goto DESCRIPTION
+endif
+echo
+endif
+
+RESOLUTION:
+# ---------
+if( $code == rslv ) then
+echo "Enter the New Resolution Code for Experiment: $EXPID"
+set   rslv = $<
+if( .$rslv == . ) goto RESOLUTION
+echo
+endif
+
+CONTROL:
+# ------
+if( $code == cntl ) then
+echo "Enter the New Control for Experiment: $EXPID"
+set   cntl = $<
+if( .$cntl == . ) goto CONTROL
+echo
+endif
+
+ACCESS:
+# -----
+if( $code == access ) then
+echo "Public/Private Access will be changed for Experiment: $EXPID"
+set   access = change
+echo
+endif
+
+KEYWORDS:
+# -------
+if( $code == keys ) then
+set keys = ""
+echo "Enter any KEYWORD(s) associated with Experiment: $EXPID"
+set    EXPTMP  =  `echo $<`
+if( ."$EXPTMP" == . ) goto KEYWORDS
+set  numkey = $#EXPTMP
+if( $numkey > 0 ) then
+     set keys =  $EXPTMP[1]
+     foreach WORD ($EXPTMP)
+     if( "$WORD" != "$keys" ) set keys = `echo ${keys} ${WORD}`
+     end
+     set keys = "keywords=${keys}"
+endif
+echo
+endif
+
+DELETE:
+# -----
+if( $code == delete ) then
+echo "Are you sure you want to delete Experiment: $EXPID"
+set   delete = `echo $<`
+if( .$delete == . ) goto DELETE
+set   delete  = `echo $delete  | tr "[:lower:]" "[:upper:]"`
+if(  $delete == "Y"     | \
+     $delete == "YES"   | \
+     $delete == "T"     | \
+     $delete == "TRUE"  ) then
+echo "Experiment: $EXPID will be deleted"
+set   delete = YES
+else
+echo "Experiment: $EXPID will NOT be deleted"
+set   delete = NULL
+endif
+echo
+endif
+
+##############################################################
+#                      Modify LISTS
+##############################################################
+
+foreach list ($lists)
+                                       /bin/rm -f new_exp_item
+                                       /bin/rm -f old_exp_item
+                    grep "<a-- ${EXPID}>" $list > old_exp_item
+set old_exp_item = `grep "<a-- ${EXPID}>" $list`
+
+
+if( $#old_exp_item != 0 ) then
+
+   set OLD_EXPID  = `echo "$old_exp_item" | cut -d'>' -f1  | cut -b6-`
+   set     color  = `echo "$old_exp_item" | cut -d'>' -f5  | cut -d'=' -f2`
+   set     IDNAME = `echo "$old_exp_item" | cut -d'>' -f12 | cut -d'=' -f3`
+   set OLD_RSLV   = `echo "$old_exp_item" | cut -d'>' -f18 | cut -d'=' -f3`
+   set     date   = `echo "$old_exp_item" | cut -d'>' -f22 | cut -d'<' -f1`
+   set OLD_CNTL   = `echo "$old_exp_item" | cut -d'>' -f24 | cut -d'=' -f2`
+   set OLD_DESC   = `echo "$old_exp_item" | cut -d'>' -f32 | cut -d'<' -f1`
+   set OLD_ACCESS = `echo "$old_exp_item" | cut -d'>' -f34 | cut -d'=' -f2 | cut -d' ' -f1`
+   set OLD_KEYS   = `echo "$old_exp_item" | cut -d'>' -f34 | cut -d'=' -f3`
+
+   if( -e sedfile  ) /bin/rm -f sedfile
+
+   if( "$desc"     == NULL ) set desc     = "$OLD_DESC"
+   if( "$rslv"     == NULL ) set rslv     = "$OLD_RSLV"
+   if( "$cntl"     == NULL ) set cntl     = "$OLD_CNTL"
+   if( "$desc"     == NULL ) set desc     = "$OLD_DESC"
+
+   if( "$access"   == NULL ) then
+     set change    = "$OLD_ACCESS"
+   else
+     if( "$OLD_ACCESS" == public  ) set change = private
+     if( "$OLD_ACCESS" == private ) set change = public
+   endif
+
+   if( "$keys" == NULL ) then
+       if( $#OLD_KEYS != 0 ) then
+       @   LENGTH_OLD_KEYS = `printf "%s" "$OLD_KEYS" | wc -c` - 4
+              set keywords = "keywords="`echo        "$OLD_KEYS" | cut -b-$LENGTH_OLD_KEYS`
+       else
+              set keywords = ""
+       endif
+    else
+              set keywords = "$keys"
+    endif
+
+   cat > sedfile << EOF
+   s?EXPID?$EXPID?g
+   s?LOGNAME?$OWNER?g
+   s?IDNAME?$IDNAME?g
+   s?RESOLUTION?$rslv?g
+   s?CONTROL?$cntl?g
+   s?DATE?$date?g
+   s?DESCRIPTION?$desc?g
+   s?COLOR?$color?g
+   s?@access?$change?g
+   s?@keywords?$keywords?g
+EOF
+   sed -f sedfile exp_item.template > new_exp_item
+
+   if( $delete == YES ) then
+       /bin/mv new_exp_item new_exp_item.tmp
+        cat new_exp_item.tmp | sed -e 's|<a--|<\!--|g' > new_exp_item
+       /bin/rm new_exp_item.tmp
+       /bin/mv ../$EXPID ../$EXPID.deleted
+   endif
+
+   set old_exp_item = "`cat old_exp_item`"
+   set new_exp_item = "`cat new_exp_item`"
+
+  /bin/mv ${list} ${list}_tmp
+   touch          ${list}
+   cat ${list}_tmp | sed -e "s|${old_exp_item}|${new_exp_item}|g" > ${list}
+
+  /bin/rm -f ${list}_tmp
+  /bin/rm -f old_exp_item
+  /bin/rm -f new_exp_item
+endif
+
+end
+
+goto MODIFICATION
+
+##############################################################
+#                      Commit LISTS
+##############################################################
+
+COMMIT:
+# -----
+   cvs commit -m "Update Lists for $EXPID by $LOGNAME" $lists
+   chgrp modeling                                      $lists
+   chmod 666                                           $lists
+   /bin/cp -f                                          $lists ../
+
+##############################################################
+
+EXIT:
+# ---
+cd ../
+/bin/rm -rf $TEMPDIR
+
+exit

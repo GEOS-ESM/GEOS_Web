@@ -1,0 +1,18 @@
+<?php
+function set_verification ($verification) {
+$content = <<<EOF
+<select name="verification" onChange="leapto(this.form)">
+EOF;
+echo $content;
+      set_item ( $verification,"merra"     , "MERRA-1 Reanalysis"       );
+      set_item ( $verification,"MERRA-2"   , "MERRA-2 Reanalysis"       );
+      set_item ( $verification,"ERA5"      , "ERA5    Reanalysis"       );
+//    set_item ( $verification,"merrasc" , "MERRA Scout ReAnalysis" );
+//    set_item ( $verification,"era40"   , "ERA40 ReAnalysis" );
+      set_exps ( $verification );
+$content = <<<EOF
+</select>
+EOF;
+echo $content;
+return; }
+?>

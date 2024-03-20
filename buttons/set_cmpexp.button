@@ -1,0 +1,17 @@
+<?php
+function set_cmpexp ($cmpexp) {
+$content = <<<EOF
+<select name="cmpexp" onChange="leapto(this.form)">
+EOF;
+echo $content;
+      set_item ( $cmpexp,"none"      , "none" );
+      set_item ( $cmpexp,"merra"     , "MERRA-1 Reanalysis"       );
+      set_item ( $cmpexp,"MERRA-2"   , "MERRA-2 Reanalysis"       );
+      set_item ( $cmpexp,"ERA5"      , "ERA5    Reanalysis"       );
+      set_exps ( $cmpexp );
+$content = <<<EOF
+</select>
+EOF;
+echo $content;
+return; }
+?>

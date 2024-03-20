@@ -1,0 +1,14 @@
+<?php
+function set_math ($math) {
+$content = <<<EOF
+<select name="math" onChange="leapto(this.form)">
+EOF;
+echo $content;
+      set_item ( $math,"LOG"    , "LOG"     );
+      set_item ( $math,"LINEAR" , "LINEAR"  );
+$content = <<<EOF
+</select>
+EOF;
+echo $content;
+return; }
+?>

@@ -1,0 +1,19 @@
+<?php
+function set_year ($year) {
+$content = <<<EOF
+<select name="year" onChange="leapto(this.form)">
+EOF;
+echo $content;
+      set_item ( $year,"Y2009","Y2009" );
+      set_item ( $year,"Y2010","Y2010" );
+//    set_item ( $year,"Y2001","Y2001" );
+//    set_item ( $year,"Y2004","Y2004" );
+//    set_item ( $year,"Y2005","Y2005" );
+//    set_item ( $year,"Y2006","Y2006" );
+//    set_item ( $year,"Y2007","Y2007" );
+$content = <<<EOF
+</select>
+EOF;
+echo $content;
+return; }
+?>

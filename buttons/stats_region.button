@@ -1,0 +1,25 @@
+<?php
+function set_region ($region) {
+$content = <<<EOF
+<select name="region" onChange="leapto(this.form)">
+EOF;
+echo $content;
+      set_item ( $region, "GLO" , "Global"                           );
+      set_item ( $region, "NHE" , "Northern Hemisphere ExtraTropics" );
+      set_item ( $region, "SHE" , "Southern Hemisphere ExtraTropics" );
+      set_item ( $region, "TRO" , "Tropics"                          );
+      set_item ( $region, "NPO" , "North Polar (60N-90N)"            );
+      set_item ( $region, "SPO" , "South Polar (60S-90S)"            );
+      set_item ( $region, "XPO" , "Xtra  Polar (60S-60N)"            );
+      set_item ( $region, "NWQ" , "North-West Quadrant"              );
+      set_item ( $region, "NEQ" , "North-East Quadrant"              );
+      set_item ( $region, "SWQ" , "South-West Quadrant"              );
+      set_item ( $region, "SEQ" , "South-East Quadrant"              );
+      set_item ( $region, "NAM" , "North America"                    );
+      set_item ( $region, "EUR" , "Europe"                           );
+$content = <<<EOF
+</select>
+EOF;
+echo $content;
+return; }
+?>

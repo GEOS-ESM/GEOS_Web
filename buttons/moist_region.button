@@ -1,0 +1,14 @@
+<?php
+function set_region ($region) {
+$content = <<<EOF
+<select name="region" onChange="leapto(this.form)">
+EOF;
+echo $content;
+      set_item ( $region, "_GLOBAL" , "Global"  );
+      set_item ( $region, "_LAND"   , "Land"    );
+$content = <<<EOF
+</select>
+EOF;
+echo $content;
+return; }
+?>

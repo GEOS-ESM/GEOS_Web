@@ -1,0 +1,84 @@
+#!/bin/csh
+
+echo
+echo ' -------------------------------------------------------------------------------'
+echo '                          NASA/GMAO GEOS GCM                                    '
+echo '                           Archive Utility                                      '
+echo ' -------------------------------------------------------------------------------'
+echo
+
+if ( ! $?CVSROOT | ! $?CVS_RSH ) then
+      echo " "
+      echo "Environment variables CVSROOT and CVS_RSH must be defined before use!"
+      echo " "
+      echo "  setenv CVS_RSH ssh"
+      echo "  setenv CVSROOT :ext:USRID@c-sourcemotel.gsfc.nasa.gov:/cvsroot/esma"
+      echo " "
+      echo "  where USRID is your USRID on sourcemotel.gsfc.nasa.gov"
+      exit 1
+endif
+
+# Set USRID and ARCHIVE Director
+# ------------------------------
+set usrid   = $LOGNAME
+set archive = /output/$usrid/GEOS5.0/intranet
+
+echo "Enter USRID on server ALTA:  (Default = "${usrid}")"
+set input = `line`
+if( .$input != "." ) set usrid   = $input
+echo "Enter ARCHIVE directory:  (Default = "${archive}")"
+set input = `line`
+if( .$input != "." ) set archive = $input
+echo
+ 
+
+# Get Latest EXPLIST before Starting
+# ----------------------------------
+cvs upd current_list
+cvs upd archive_list
+
+
+# Archive Experiments
+# -------------------
+foreach exp ($argv)
+echo "Arhiving Experiment: "$exp
+echo
+scp -r ${usrid}@alta:/gmao/intranet/research/modeling/agcm/geos5/$exp $archive
+set rc_archive = $status
+
+if( $rc_archive == 0 ) then
+
+/bin/mv current_list current.tmp
+if( -e sedfile  ) /bin/rm  sedfile
+cat >  sedfile << EOF
+s?href=$exp?zref=$exp?g
+s?a-- $exp?!-- $exp?g
+s?$exp a--?$exp !--?g
+EOF
+sed -f sedfile current.tmp > current_list
+
+/bin/mv archive_list archive.tmp
+if( -e sedfile  ) /bin/rm  sedfile
+cat >  sedfile << EOF
+s?href=$exp?zref=$exp?g
+EOF
+sed -f sedfile archive.tmp > archive_list
+
+cvs commit -m "Archive Experiment $exp" current_list archive_list
+scp current_list archive_list ${usrid}@alta:/gmao/intranet/research/modeling/agcm/geos5
+set rc_commit = $status
+
+if( $rc_commit == 0 ) then
+ssh ${usrid}@alta.gsfc.nasa.gov /bin/rm -r /gmao/intranet/research/modeling/agcm/geos5/$exp
+set rc_remove = $status
+endif
+
+endif
+
+echo
+echo "Archive Status for Exp: "$exp" = "$rc_archive
+echo "Commit  Status for Exp: "$exp" = "$rc_commit
+echo "Remove  Status for Exp: "$exp" = "$rc_remove
+echo
+
+end

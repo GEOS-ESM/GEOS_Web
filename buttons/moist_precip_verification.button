@@ -1,0 +1,21 @@
+<?php
+function set_precip_obs ($precip_obs) {
+$content = <<<EOF
+<select name="precip_obs" onChange="leapto(this.form)">
+EOF;
+echo $content;
+      set_item ( $precip_obs,"GPCP"      , "GPCP"        );
+      set_item ( $precip_obs,"CMAP"      , "CMAP"        );
+      set_item ( $precip_obs,"merra"     , "MERRA-1 Reanalysis"       );
+      set_item ( $precip_obs,"MERRA-2"   , "MERRA-2 Reanalysis"       );
+      set_item ( $precip_obs,"ERA5"      , "ERA5    Reanalysis"       );
+      set_item ( $precip_obs,"ecinterim" , "ERA_Interim" );
+      set_item ( $precip_obs,"SSMI"      , "SSMI"        );
+//    set_item ( $precip_obs,"merrasc"   , "MERRA Scout" );
+      set_exps ( $precip_obs );
+$content = <<<EOF
+</select>
+EOF;
+echo $content;
+return; }
+?>

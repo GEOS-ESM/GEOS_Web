@@ -1,0 +1,14 @@
+<?php
+function set_verbose ($verbose) {
+$content = <<<EOF
+<select name="verbose" onChange="leapto(this.form)">
+EOF;
+echo $content;
+      set_item ( $verbose, "0" ,"Verbose Off" );
+      set_item ( $verbose, "1" ,"Verbose On"  );
+$content = <<<EOF
+</select>
+EOF;
+echo $content;
+return; }
+?>

@@ -1,0 +1,24 @@
+<?php
+function set_type ($type) {
+$content = <<<EOF
+<select name="type" onChange="leapto(this.form)">
+EOF;
+echo $content;
+      set_item ( $type, "corcmp",  "Anomaly Correlation"    );
+      set_item ( $type, "rmscmp",           "Root Mean Square (RMS) Error" );
+      set_item ( $type, "" );
+      set_item ( $type, "rmscmp_BIAS",      "RMS for Bias Error" );
+      set_item ( $type, "rmscmp_RANDOM",    "RMS for Random Error" );
+      set_item ( $type, "rmscmp_AMPLITUDE", "RMS for Amplitude Error" );
+      set_item ( $type, "rmscmp_PHASE",     "RMS for Phase Error" );
+      set_item ( $type, "rmsdcmp",          "RMS Decomposition Montage"      );
+      set_item ( $type, "" );
+      set_item ( $type, "all"   , "Systematic Error (Individual)"  );
+      set_item ( $type, "syscmp", "Systematic Error (Comparison)" );
+      set_item ( $type, "" );
+$content = <<<EOF
+</select>
+EOF;
+echo $content;
+return; }
+?>

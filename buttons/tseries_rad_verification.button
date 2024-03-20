@@ -1,0 +1,18 @@
+<?php
+function set_rad_obs ($rad_obs) {
+$content = <<<EOF
+<select name="rad_obs" onChange="leapto(this.form)">
+EOF;
+echo $content;
+      set_item ( $rad_obs, "CERES_EBAF", "CERES_EBAF" );
+      set_item ( $rad_obs, "CERES_EBAF-4", "CERES_EBAF-4" );
+      set_item ( $rad_obs,"merra"     , "MERRA-1 Reanalysis"       );
+      set_item ( $rad_obs,"MERRA-2"   , "MERRA-2 Reanalysis"       );
+      set_item ( $rad_obs,"ERA5"      , "ERA5    Reanalysis"       );
+      set_exps ( $rad_obs );
+$content = <<<EOF
+</select>
+EOF;
+echo $content;
+return; }
+?>

@@ -1,0 +1,562 @@
+#! /bin/csh -f
+# $1 = Target Experiment
+# $2 = Parent Experiment or TAG
+
+
+if ( ! $?CVSROOT | ! $?CVS_RSH ) then
+      echo " "
+      echo "Environment variables CVSROOT and CVS_RSH must be defined before use\!"
+      echo " "
+      echo "  setenv CVS_RSH ssh"
+      echo "  setenv CVSROOT :ext:USRID@progress.nccs.nasa.gov:/cvsroot/esma"
+      echo "             (or :ext:USRID@tunnel:/cvsroot/esma)"
+      echo " "
+      echo "  where USRID is your USRID on progress.nccs.nasa.gov"
+      echo " "
+      exit 1
+endif
+
+echo
+if( .$1 == . ) then
+echo "Enter the Experiment ID: EXPID"
+set EXPID = $<
+else
+set EXPID = $1
+endif
+
+
+# Check if Experiment is NEW
+# --------------------------
+if( ! -e $EXPID ) then
+    set new = true
+else
+    echo "Experiment ID:  $EXPID  already exists\!"
+    exit 1
+    set new = false
+endif
+
+
+# Define TAG for CVS Check-out
+# ----------------------------
+if( .$2 == . ) then
+    set TAG = HEAD
+else
+    set TAG = $2
+endif
+
+
+# Extract Simple Date
+# -------------------
+set date = `date +%m/%d/%Y`
+
+echo
+echo ' -------------------------------------------------------------------------------'
+echo '                          NASA/GMAO GEOS GCM                                    '
+echo '                            MAKEXP Utility                                      '
+echo ' -------------------------------------------------------------------------------'
+echo
+                                                                                                                                   
+echo "Enter the Resolution Code (xnn) for the New Experiment:"
+echo "      where  x = 'b' for ~ 2.00-degree ( 144 x  91)"
+echo "                 'c' for ~ 1.00-degree ( 288 x 181)"
+echo "                 'd' for ~ 0.50-degree ( 540 x 361 or  576 x 361 )"
+echo "                 'e' for ~ 0.25-degree (1080 x 721 or 1152 x 721 )"
+echo "      and   nn = the number of levels"
+set rslv = $<
+echo
+
+echo "Enter the CONTROL expid:"
+set cntl = $<
+echo
+
+DESCRIPTION:
+echo "Enter a Brief Description:"
+set   EXPTMP =  `echo $<`
+if( $#EXPTMP > 0 ) then
+    set desc =  $EXPTMP[1]
+    foreach WORD ($EXPTMP)
+    if( "$WORD" != "$desc" ) set desc = `echo ${desc} ${WORD}`
+    end
+else
+    goto DESCRIPTION
+endif
+echo
+
+set keywords = ""
+echo "Enter any KEYWORD(s) associated with Experiment:"
+set  EXPTMP =  `echo $<`
+set  numkey = $#EXPTMP
+if( $numkey > 0 ) then
+     set keywords =  $EXPTMP[1]
+     foreach WORD ($EXPTMP)
+     if( "$WORD" != "$keywords" ) set keywords = `echo ${keywords} ${WORD}`
+     end
+     set keywords = "keywords=${keywords}"
+endif
+echo
+
+ACCESS:
+echo "Do you wish this experiment to be 'public' or 'private'? (Default: public)"
+set access =  `echo $<`
+if( .$access == . ) set access = public
+     if(  $access != public & $access != private ) then
+     echo
+     echo "You MUST specifiy: public or private"
+     goto ACCESS
+endif
+
+
+# Set Default Colors
+# ------------------
+                             set color = "#707070"
+if( $LOGNAME == "takacs"   ) set color = "darkred"
+if( $LOGNAME == "dao_ops"  ) set color = "#5C3E90"
+if( $LOGNAME == "tassone"  ) set color = "#e62b86"
+if( $LOGNAME == "bacmj"    ) set color = "darkgreen"
+if( $LOGNAME == "wtan"     ) set color = "#808000"
+if( $LOGNAME == "molod"    ) set color = "#800080"
+if( $LOGNAME == "austin"   ) set color = "#002809"
+if( $LOGNAME == "walker"   ) set color = "#00AEED"
+if( $LOGNAME == "bchen"    ) set color = "#008531"
+if( $LOGNAME == "dvanpelt" ) set color = "#E7573B"
+if( $LOGNAME == "chang"    ) set color = "#00A9A4"
+if( $LOGNAME == "dasilva"  ) set color = "#980034"
+if( $LOGNAME == "yury"     ) set color = "#E10052"
+if( $LOGNAME == "issong"   ) set color = "#0033AA"
+if( $LOGNAME == "jmarshak" ) set color = "#6DC989"
+if( $LOGNAME == "hwang"    ) set color = "#00AEED"
+if( $LOGNAME == "wchao"    ) set color = "#005B1E"
+if( $LOGNAME == "dkokron"  ) set color = "#FF8000"
+if( $LOGNAME == "bzhao"    ) set color = "#00AD63"
+if( $LOGNAME == "nielsen"  ) set color = "#CF0021"
+if( $LOGNAME == "jnielsen" ) set color = "#CF0021"
+if( $LOGNAME == "sriki"    ) set color = "#69C08A"
+if( $LOGNAME == "mathomp4" ) set color = "#00CCCC"
+if( $LOGNAME == "dbarahon" ) set color = "#A7A400"
+if( $LOGNAME == "rcullath" ) set color = "#00A54E"
+if( $LOGNAME == "zhaoli"   ) set color = "#4AA02C"
+if( $LOGNAME == "mfuente2" ) set color = "#B1629F"
+if( $LOGNAME == "emcgrath" ) set color = "#0F99F5"
+if( $LOGNAME == "jstassi"  ) set color = "#0EC414"
+if( $LOGNAME == "dvarier"  ) set color = "#C219AB"
+if( $LOGNAME == "jnattala" ) set color = "#F70A5D"
+if( $LOGNAME == "rtodling" ) set color = "#20E87F"
+if( $LOGNAME == "todling"  ) set color = "#20E87F"
+if( $LOGNAME == "sakella"  ) set color = "#CCC900"
+if( $LOGNAME == "mkim1n"   ) set color = "#FF8000"
+if( $LOGNAME == "aelakkra" ) set color = "#FF3804"
+if( $LOGNAME == "narnold1" ) set color = "#178511"
+if( $LOGNAME == "pnorris"  ) set color = "#FFA500"
+if( $LOGNAME == "wputman"  ) set color = "#F2B948"
+if( $LOGNAME == "jjcampb2" ) set color = "#e35812"
+if( $LOGNAME == "sdrabenh" ) set color = "#08a7c7"
+
+
+# Set Default IDNAME
+# ------------------
+                             set IDNAME = $LOGNAME
+if( $LOGNAME == "takacs"   ) set IDNAME = "ltakacs"
+if( $LOGNAME == "nielsen"  ) set IDNAME = "jnielsen"
+if( $LOGNAME == "bacmj"    ) set IDNAME = "bac"
+if( $LOGNAME == "austin"   ) set IDNAME = "aconaty"
+if( $LOGNAME == "chang"    ) set IDNAME = "ychang"
+if( $LOGNAME == "jmarshak" ) set IDNAME = "wly0m"
+if( $LOGNAME == "wchao"    ) set IDNAME = "l4wcc"
+if( $LOGNAME == "zhaoli"   ) set IDNAME = "zli7"
+
+# Set Experiment Type (CLI, Replay, or ANA)
+# -----------------------------------------
+                             set exptype = "cli"
+if( $LOGNAME == "takacs"   ) set exptype = "cli"
+if( $LOGNAME == "dao_ops"  ) set exptype = "ana"
+if( $LOGNAME == "tassone"  ) set exptype = "cli"
+if( $LOGNAME == "bacmj"    ) set exptype = "cli"
+if( $LOGNAME == "wtan"     ) set exptype = "cli"
+if( $LOGNAME == "austin"   ) set exptype = "ana"
+if( $LOGNAME == "molod"    ) set exptype = "cli"
+if( $LOGNAME == "walker"   ) set exptype = "cli"
+if( $LOGNAME == "bchen"    ) set exptype = "cli"
+if( $LOGNAME == "dvanpelt" ) set exptype = "ana"
+if( $LOGNAME == "dasilva"  ) set exptype = "cli"
+if( $LOGNAME == "issong"   ) set exptype = "cli"
+if( $LOGNAME == "hwang"    ) set exptype = "ana"
+if( $LOGNAME == "wchao"    ) set exptype = "cli"
+if( $LOGNAME == "dkokron"  ) set exptype = "cli"
+if( $LOGNAME == "bzhao"    ) set exptype = "cli"
+if( $LOGNAME == "sriki"    ) set exptype = "cli"
+if( $LOGNAME == "mfuente2" ) set exptype = "ana"
+if( $LOGNAME == "emcgrath" ) set exptype = "cli"
+if( $LOGNAME == "jstassi"  ) set exptype = "ana"
+if( $LOGNAME == "dvarier"  ) set exptype = "ana"
+if( $LOGNAME == "jnattala" ) set exptype = "cli"
+if( $LOGNAME == "rtodling" ) set exptype = "ana"
+if( $LOGNAME == "todling"  ) set exptype = "ana"
+if( $LOGNAME == "sakella"  ) set exptype = "ana"
+if( $LOGNAME == "mkim1"    ) set exptype = "ana"
+if( $LOGNAME == "aelakkra" ) set exptype = "ana"
+if( $LOGNAME == "narnold1" ) set exptype = "cli"
+if( $LOGNAME == "pnorris"  ) set exptype = "cli"
+
+echo
+  set    type = ""
+while( .$type == . )
+    if( $exptype == "cli" ) then
+        echo "Enter Experiment Type:  cli  for Climatology Run (Default)"
+    else
+        echo "Enter Experiment Type:  cli  for Climatology Run          "
+    endif
+    if( $exptype == "rep" ) then
+        echo "                        rep  for DAS Replay (Default)"
+    else
+        echo "                        rep  for DAS Replay          "
+    endif
+    if( $exptype == "ana" ) then
+        echo "                        ana  for Analysis/Verification (Default)"
+    else
+        echo "                        ana  for Analysis/Verification          "
+    endif
+    set   type = $<
+    if( .$type == . ) set type = $exptype
+    if(  $type != "cli" & \
+         $type != "rep" & \
+         $type != "ana" ) then
+      set type  = ""
+    endif
+end
+
+# Set Experiment Year and Month (CLIM and DJF by Default)
+# -------------------------------------------------------
+  set expyear  = "CLIM"
+  set expmonth = "DJF"
+  echo
+  set    year = ""
+  echo "Enter Experiment Year:  (eg: Y2001 (Default is CLIM))"
+  set   year = $<
+  if( .$year == . ) set year = $expyear
+# set   year = `echo $year | tr "[:lower:]" "[:upper:]"`
+  if(  $year != CLIM ) then
+       set  length = `echo $year | awk '{print length}'`
+       if( $length == 4 ) set year = Y$year
+MONTH:
+       echo "Enter Month or Season for Experiment (3-character):"
+       echo "(Options: JAN FEB MAR APR MAY JUN JUL AUG SEP OCT NOV DEC DJF JJA MAM SON ANN)"
+       set month = $<
+       if( .$month == . ) goto MONTH
+       set length = `echo $month | awk '{print length}'`
+       if( $length != 3 ) goto MONTH
+       set month = `echo $month | tr "[:lower:]" "[:upper:]"`
+       if( $month != JAN & \
+           $month != FEB & \
+           $month != MAR & \
+           $month != APR & \
+           $month != MAY & \
+           $month != JUN & \
+           $month != JUL & \
+           $month != AUG & \
+           $month != SEP & \
+           $month != OCT & \
+           $month != NOV & \
+           $month != DEC & \
+           $month != DJF & \
+           $month != JJA & \
+           $month != MAM & \
+           $month != SON & \
+           $month != ANN ) goto MONTH
+  else
+SEASON:
+       echo "Enter Month or Season for Experiment (3-character, Default = DJF):"
+       echo "(Options: JAN FEB MAR APR MAY JUN JUL AUG SEP OCT NOV DEC DJF JJA MAM SON ANN)"
+       set month = $<
+       if( .$month == . ) set month = $expmonth
+       set length = `echo $month | awk '{print length}'`
+       if( $length != 3 ) goto SEASON
+       set month = `echo $month | tr "[:lower:]" "[:upper:]"`
+       if( $month != JAN & \
+           $month != FEB & \
+           $month != MAR & \
+           $month != APR & \
+           $month != MAY & \
+           $month != JUN & \
+           $month != JUL & \
+           $month != AUG & \
+           $month != SEP & \
+           $month != OCT & \
+           $month != NOV & \
+           $month != DEC & \
+           $month != DJF & \
+           $month != JJA & \
+           $month != MAM & \
+           $month != SON & \
+           $month != ANN ) goto SEASON
+  endif
+
+##############################################################
+#               Check-out Web Pages from cvs
+##############################################################
+
+set  pwd = `pwd`
+if( $pwd =~ *extranet* ) then
+     set list_type = "extranet"
+else
+     set list_type = "intranet"
+endif
+
+if( $TAG == "HEAD" ) then
+     cvs -z3 co         GEOS_Web
+else
+     cvs -z3 co -r $TAG GEOS_Web
+endif
+
+##############################################################
+#                cd to EXPID and update Lists
+##############################################################
+
+if( $new == "true" ) then
+   /bin/mv    GEOS_Web   $EXPID
+else
+   /bin/cp -r GEOS_Web/* $EXPID
+   /bin/rm -r GEOS_Web
+endif
+
+cd $EXPID
+   /bin/rm  -f                      extranet_ana_list extranet_cli_list extranet_list extranet_rep_list intranet_ana_list intranet_cli_list intranet_list intranet_rep_list
+    cvs upd -r BRANCH_GEOSWEB_LISTS extranet_ana_list extranet_cli_list extranet_list extranet_rep_list intranet_ana_list intranet_cli_list intranet_list intranet_rep_list
+   /bin/cp  -f                   ../extranet*list ../intranet*list .
+
+##############################################################
+#                     Update EXPID Info
+##############################################################
+
+if( $new == "true" ) then
+
+   if( -e sedfile  ) /bin/rm  sedfile
+   if( -e exp_item ) /bin/rm  exp_item
+
+cat > sedfile << EOF
+s?EXPID?$EXPID?g
+s?LOGNAME?$LOGNAME?g
+s?IDNAME?$IDNAME?g
+s?RESOLUTION?$rslv?g
+s?CONTROL?$cntl?g
+s?DATE?$date?g
+s?DESCRIPTION?$desc?g
+s?COLOR?$color?g
+s?@access?$access?g
+s?@keywords?$keywords?g
+EOF
+sed -f sedfile exp_item.template > exp_item
+
+   /bin/mv ${list_type}_${type}_list ${list_type}_${type}_tmp
+   /bin/mv ${list_type}_list         ${list_type}_tmp
+
+   cat exp_item ${list_type}_${type}_tmp > ${list_type}_${type}_list
+   cat exp_item ${list_type}_tmp         > ${list_type}_list
+
+   cvs commit -m "Update Lists for $EXPID by $LOGNAME" ${list_type}_list ${list_type}_${type}_list
+   chgrp modeling                                      ${list_type}_list ${list_type}_${type}_list
+   chmod 666                                           ${list_type}_list ${list_type}_${type}_list
+   /bin/cp                                             ${list_type}_list ${list_type}_${type}_list ../
+
+   /bin/rm sedfile
+   /bin/rm exp_item
+   /bin/rm ${list_type}_${type}_tmp
+   /bin/rm ${list_type}_tmp
+
+    echo $LOGNAME > usrid
+    echo $EXPID   > expid
+    echo $type    > exptype
+    echo $desc    > expdesc
+
+# ------------------------------------------------------
+         else
+# ------------------------------------------------------
+
+    if( -e  usrid   ) /bin/rm usrid
+    if( -e  expid   ) /bin/rm expid
+    if( -e  exptype ) /bin/rm exptype
+    if( -e  expdesc ) /bin/rm expdesc
+      echo $LOGNAME >  usrid
+      echo $EXPID   >  expid
+      echo $type    >  exptype
+      echo $desc    >  expdesc
+
+endif
+
+##############################################################
+
+cvs -z3 co -r HEAD -d GCM_ChangeLog esma/src/Applications/GEOSgcm/Application/ChangeLog
+/bin/cp    -f GCM_ChangeLog/ChangeLog ../AGCM_ChangeLog
+
+touch regress_test
+touch TAG
+mkdir -p SRC
+
+##############################################################
+#           Make YEAR MONTH and EXPERIMENT Directories
+##############################################################
+
+    mkdir -p $year/$month/corcmp
+    mkdir -p $year/$month/g5ncep
+    mkdir -p $year/$month/g5ecmwf
+    mkdir -p $year/$month/GFS
+    mkdir -p $year/$month/ECMWF
+    mkdir -p $year/$month/$EXPID
+    mkdir -p $year/$month/$EXPID.g5ecmwf
+    mkdir -p $year/$month/$EXPID.g5ncep
+    mkdir -p $year/$month/$EXPID.GFS
+    mkdir -p $year/$month/$EXPID.ECMWF
+
+##############################################################
+#          Make Plots Directory for Coupled Experiments
+##############################################################
+
+    mkdir -p plots_ocn
+
+##############################################################
+#               Modify Default Files for Specifics
+##############################################################
+
+echo $year  > YEAR
+echo $month > MONTH
+
+##############################################################
+#           Link GEOS_Web_Pages to current EXPID
+##############################################################
+
+
+# /bin/mv    pages pages.old
+# /bin/mkdir pages
+# cd         pages
+# /bin/ln -sf ../../GEOS_Web_Pages/pages/* .
+# cd ../
+
+# /bin/mv index.php index.php.old
+# /bin/ln -sf ../GEOS_Web_Pages/index.php .
+
+# /bin/mv    buttons buttons.old
+# /bin/mkdir buttons
+# cd         buttons
+# /bin/ln -sf ../../GEOS_Web_Pages/buttons/* .
+# cd ../
+
+
+# Modify index.php to have proper YEAR and MONTH default
+# ------------------------------------------------------
+#                  /bin/mv  index.php index.tmp
+#if( -e sedfile  ) /bin/rm  sedfile
+#cat >  sedfile << EOF
+#s?CLIM?$year?g
+#s?DJF?$month?g
+#EOF
+#sed -f  sedfile index.tmp > index.php
+#/bin/rm sedfile
+#/bin/rm index.tmp
+
+# Modify buttons to have proper YEAR default
+# ------------------------------------------
+                  /bin/mv  buttons/year.button buttons/year.button.tmp
+if( -e sedfile  ) /bin/rm  sedfile
+cat >  sedfile << EOF
+s?CLIM?$year?g
+EOF
+sed -f  sedfile buttons/year.button.tmp > buttons/year.button
+/bin/rm sedfile
+/bin/rm buttons/year.button.tmp
+
+# Modify buttons to have proper MONTH default
+# -------------------------------------------
+if( $month != DJF ) then
+                  /bin/mv  buttons/season.button buttons/season.button.tmp
+if( -e sedfile  ) /bin/rm  sedfile
+cat >  sedfile << EOF
+s?//?  ?g
+EOF
+sed -f  sedfile buttons/season.button.tmp > buttons/season.button
+/bin/rm sedfile
+/bin/rm buttons/season.button.tmp
+endif
+
+# Modify buttons to have default Control comparisons
+# --------------------------------------------------
+                  /bin/mv  buttons/set_exps.php buttons/set_exps.tmp
+if( -e sedfile  ) /bin/rm  sedfile
+cat >  sedfile << EOF
+s?@CMPEXP?${cntl}?g
+EOF
+sed -f  sedfile buttons/set_exps.tmp > buttons/set_exps.php
+/bin/rm sedfile
+/bin/rm buttons/set_exps.tmp
+
+# Modify buttons to have default Forecast comparisons for STATS
+# -------------------------------------------------------------
+                  /bin/mv  buttons/stats_exps.php buttons/stats_exps.tmp
+if( -e sedfile  ) /bin/rm  sedfile
+if( .$cntl == . ) then
+    set CMPEXPS = set CMPEXPS = \""${EXPID}"\",\"GFS\",\"ECMWF\"
+else
+    set CMPEXPS = set CMPEXPS = \""${EXPID}"\",\""${cntl}"\",\"GFS\",\"ECMWF\"
+endif
+cat >  sedfile << EOF
+s?@CMPEXP?${CMPEXPS}?g
+EOF
+sed -f  sedfile buttons/stats_exps.tmp > buttons/stats_exps.php
+/bin/rm sedfile
+/bin/rm buttons/stats_exps.tmp
+
+# Make MISC and RC directories
+# ----------------------------
+mkdir misc RC
+chmod 1777 misc
+
+##############################################################
+#           Create/Modify CVS Branch for EXPID Tag
+#  Note: Dots "." in EXPID will be changed to Underscores "_"
+##############################################################
+
+# Change Dots to Underscores in EXPID
+# -----------------------------------
+set EXPIDTAG = ''
+      @ n = 1
+      set bit = `echo ${EXPID} | cut -b $n`
+      while( "${bit}" != '' )
+         if( "${bit}" == '.' ) set bit = "_"
+         set EXPIDTAG = ${EXPIDTAG}${bit}
+                  @ n = $n + 1
+         set bit = `echo ${EXPID} | cut -b $n`
+      end
+set EXPIDTAG = `echo ${EXPIDTAG}`
+
+set   branchtest = `cvs status -v index.php | grep BRANCH_${EXPIDTAG}_$LOGNAME`
+if( $#branchtest == 0 ) cvs tag -b BRANCH_${EXPIDTAG}_$LOGNAME
+                        cvs upd -r BRANCH_${EXPIDTAG}_$LOGNAME
+                        cvs commit -m "Experiment Tag ${EXPIDTAG}"
+                        cvs upd -r BRANCH_GEOSWEB_LISTS ${list_type}_list ${list_type}_${type}_list
+                        cvs tag -F ${EXPIDTAG}
+
+foreach   list (${list_type}_list ${list_type}_${type}_list)
+    set   listdiff = `/usr/bin/diff $list ../$list`
+    if( $#listdiff != 0 ) then
+        echo ' '
+        echo 'Warning! '
+        echo 'List: '$list' is not consistent with CVS Repository'
+        echo 'Please contact L.Takacs for assistance'
+        echo ' '
+    endif
+end
+
+##############################################################
+
+cd ../
+
+# Make/Update INTRANET USRID Directory for MISC Files
+# ---------------------------------------------------
+if(! -e $LOGNAME ) then
+    mkdir -p  $LOGNAME/pages                      $LOGNAME/misc
+   /bin/cp    $EXPID/usrid                        $LOGNAME
+   /bin/cp    $EXPID/index_misc.php               $LOGNAME/index.php
+   /bin/cp    $EXPID/pages/index.php              $LOGNAME/pages/index.php
+   /bin/cp -f $EXPID/pages/unregister_globals.php $LOGNAME/pages/unregister_globals.php
+else
+   /bin/cp -f $EXPID/pages/index.php              $LOGNAME/pages/index.php
+   /bin/cp -f $EXPID/pages/unregister_globals.php $LOGNAME/pages/unregister_globals.php
+endif

@@ -1,0 +1,2 @@
+<a-- EXPID> <tr> <td align=center> <a href=EXPID> <font color=COLOR> <B>EXPID</B> </font> </a> </td> <td align=center> <a href=index.php?sort=IDNAME> <font color=COLOR> LOGNAME </font> </a> </td> <td align=center bgcolor = #dddddd> <a href=index.php?sort=RESOLUTION> RESOLUTION </a> </td> <td align=center> DATE </td> <td align=center bgcolor = #dddddd> <a href=CONTROL> <font color=darkblue> <B>CONTROL</B> </font> </a> </td> <td align=center> DESCRIPTION </td> </tr> <a-- EXPID access=@access @keywords a-->
+

@@ -1,0 +1,29 @@
+<?php
+function set_season ($season) {
+$content = <<<EOF
+<select name="season" onChange="leapto(this.form)">
+EOF;
+echo $content;
+//    set_item ( $season , "JAN" ,"January"                   );
+//    set_item ( $season , "FEB" ,"February"                  );
+//    set_item ( $season , "MAR" ,"March"                     );
+//    set_item ( $season , "APR" ,"April"                     );
+//    set_item ( $season , "MAY" ,"May"                       );
+//    set_item ( $season , "JUN" ,"June"                      );
+//    set_item ( $season , "JUL" ,"July"                      );
+//    set_item ( $season , "AUG" ,"August"                    );
+//    set_item ( $season , "SEP" ,"September"                 );
+//    set_item ( $season , "OCT" ,"October"                   );
+//    set_item ( $season , "NOV" ,"November"                  );
+//    set_item ( $season , "DEC" ,"December"                  );
+      set_item ( $season , "DJF" ,"December-January-February" );
+      set_item ( $season , "JJA" ,"June-July-August"          );
+//    set_item ( $season , "MAM" ,"March-April-May"           );
+//    set_item ( $season , "SON" ,"September-October-November");
+//    set_item ( $season , "ANN" ,"Annual"                    );
+$content = <<<EOF
+</select>
+EOF;
+echo $content;
+return; }
+?>

@@ -1,0 +1,20 @@
+<?php
+function set_verification ($verification) {
+$content = <<<EOF
+<select name="verification" onChange="leapto(this.form)">
+EOF;
+echo $content;
+      set_item ( $verification,"cc5_CERES_EBAF-4", "CERES_EBAF-4 (5% Cld-Clr)"  );
+      set_item ( $verification,"CERES_EBAF-4", "CERES_EBAF-4"  );
+      set_item ( $verification,"CERES_EBAF", "CERES_EBAF"  );
+      set_item ( $verification,"ERBE"      , "ERBE"    );
+      set_item ( $verification,"merra"     , "MERRA-1 Reanalysis"       );
+      set_item ( $verification,"MERRA-2"   , "MERRA-2 Reanalysis"       );
+      set_item ( $verification,"ERA5"      , "ERA5    Reanalysis"       );
+      set_exps ( $verification );
+$content = <<<EOF
+</select>
+EOF;
+echo $content;
+return; }
+?>

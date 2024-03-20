@@ -1,0 +1,14 @@
+<?php
+function set_closeness ($closeness) {
+$content = <<<EOF
+<select name="closeness" onChange="leapto(this.form)">
+EOF;
+echo $content;
+      set_item ( $closeness,"none"      , "none" );
+      set_exps ( $closeness );
+$content = <<<EOF
+</select>
+EOF;
+echo $content;
+return; }
+?>

@@ -1,0 +1,19 @@
+<?php
+function set_tpw_obs ($tpw_obs) {
+$content = <<<EOF
+<select name="tpw_obs" onChange="leapto(this.form)">
+EOF;
+echo $content;
+      set_item ( $tpw_obs,"GSSTF"   , "GSSTF" );
+      set_item ( $tpw_obs,"ssmi"    , "SSMI"  );
+      set_item ( $tpw_obs,"SRB"     , "SRB"   );
+      set_item ( $tpw_obs,"merra"     , "MERRA-1 Reanalysis"       );
+      set_item ( $tpw_obs,"MERRA-2"   , "MERRA-2 Reanalysis"       );
+      set_item ( $tpw_obs,"ERA5"      , "ERA5    Reanalysis"       );
+      set_exps ( $tpw_obs );
+$content = <<<EOF
+</select>
+EOF;
+echo $content;
+return; }
+?>

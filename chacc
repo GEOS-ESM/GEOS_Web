@@ -1,0 +1,61 @@
+#!/bin/csh -f
+
+@ nmax = $#argv
+
+if( $nmax >= 1 ) then
+
+set datetime = `date +%Y%m%d_%H%M%S`
+set pwd      = `pwd`
+
+# Create Temporary working directory
+# ----------------------------------
+mkdir chacc.$datetime
+cd    chacc.$datetime
+
+cvs -q co GEOS_Web > /dev/null
+cd        GEOS_Web
+
+# Loop over Lists
+# ---------------
+set lists = `/bin/ls -1 intranet*list`
+foreach list ($lists)
+
+# Loop over Experiments
+# ---------------------
+@       n  = 1
+while( $n <= $nmax )
+
+setenv EXPID "$argv[$n]"
+
+  /bin/mv    $list $list.tmp
+         cat $list.tmp | awk '{ if ($2 ~ ENVIRON["EXPID"]) { if($(NF-1)~"access=public") { sub(/public/,"private")} else {sub(/private/,"public")}; print} else print }' > $list
+  /bin/rm -f $list.tmp
+
+     @ n = $n + 1
+end
+
+end
+
+# Commit New Lists to CVS
+# -----------------------
+    cvs commit -m "Update exp lists" $lists
+
+# Copy Lists to Intranet directory and Remove working directory
+# -------------------------------------------------------------
+/bin/cp -f $lists $pwd
+cd $pwd
+/bin/rm -r chacc.$datetime
+
+else
+
+echo " "
+echo "Usage:"
+echo "-----"
+echo "chacc EXP1 EXP2 EXP3 ... EXPn"
+echo " "
+echo "This utility will toggle the access setting for each experiment"
+echo "from 'public' to 'private', and vise versa."
+echo " "
+
+endif
+

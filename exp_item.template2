@@ -1,0 +1,11 @@
+<a-- EXPID> <tr>
+   <td align=center                  > <a href=EXPID> <font color=COLOR>      <B>EXPID</B>   </font> </a> </td>
+   <td align=center bgcolor = #dddddd> <a href=/intranet/personnel/IDNAME> <font color=COLOR>         LOGNAME     </font> </a> </td>
+   <td align=center                  >                <font color=#00A8ED>      RESOLUTION </font> </a> </td>
+   <td align=center bgcolor = #dddddd> DATE </td>
+   <td align=center                  > <a href=CONTROL> <font color=darkblue> CONTROL </font> </td>
+   <td align=center bgcolor = #dddddd> <a href="/intranet/personnel/rtodling/gsidev/g5das_Beta10.htm"> <font color=darkblue> <B> TAG </B> </font> </a> </td>
+   <td align=center                  > DESCRIPTION
+  </td>
+</tr> <EXPID a-->
+

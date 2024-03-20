@@ -1,0 +1,14 @@
+<?php
+function set_gifs ($gifs) {
+$content = <<<EOF
+<select name="gifs" onChange="leapto(this.form)">
+EOF;
+echo $content;
+  set_item ( $gifs,"Animated","Animated" );
+  set_item ( $gifs,"Static","Static" );
+$content = <<<EOF
+</select>
+EOF;
+echo $content;
+return; }
+?>

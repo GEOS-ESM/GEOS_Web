@@ -1,0 +1,156 @@
+#!/bin/csh
+# $1 = Target Experiment
+# $2 = Parent Experiment or TAG (for GEOS_Web)
+# $3 = DASTAG
+
+
+if ( ! $?CVSROOT | ! $?CVS_RSH ) then
+      echo " "
+      echo "Environment variables CVSROOT and CVS_RSH must be defined before use!"
+      echo " "
+      echo "  setenv CVS_RSH ssh"
+      echo "  setenv CVSROOT :ext:USRID@c-sourcemotel.gsfc.nasa.gov:/cvsroot/esma"
+      echo " "
+      echo "  where USRID is your USRID on sourcemotel.gsfc.nasa.gov"
+      exit 1
+endif
+
+# Check if Experiment is NEW
+# --------------------------
+if( ! -e $1 ) then
+    set new = true
+else
+    set new = false
+endif
+
+
+# Define TAG for CVS Check-out
+# ----------------------------
+if( .$2 == . ) then
+    set TAG = HEAD
+else
+    set TAG = $2
+endif
+
+# Define DASTAG
+# -------------
+set dastag = $3
+
+
+# Extract Simple Date
+# -------------------
+set date = `date +%m/%d/%Y`
+
+echo
+echo ' -------------------------------------------------------------------------------'
+echo '                          NASA/GMAO GEOS GCM                                    '
+echo '                            MAKEXP Utility                                      '
+echo ' -------------------------------------------------------------------------------'
+echo
+                                                                                                                                   
+if( $new == "true" ) then
+echo "Enter the Resolution Code (xnn) for the New Experiment:"
+echo "      where  x = 'b' for 2.00 x 2.50 ( 144 x  91)"
+echo "                 'c' for 1.00 x 1.25 ( 288 x 181)"
+echo "                 'd' for 0.50 x 0.66 ( 540 x 361)"
+echo "                 'e' for 0.25 x 0.33 (1080 x 721)"
+echo "      and   nn = the number of levels"
+set rslv = `line`
+echo
+echo "Enter the CONTROL expid:"
+set cntl = `line`
+echo
+echo "Enter a Brief Description:"
+set desc = `line`
+endif
+
+
+# Set Experiment Year (CLIM by Default)
+# -------------------------------------
+  set expyear = "CLIM"
+  echo
+  set    year = ""
+  echo "Enter Experiment Year:  (eg: Y2001 (Default is CLIM))"
+  set   year = `line`
+  if( .$year == . ) set year = $expyear
+
+
+# Check-out Web Pages from cvs
+# ----------------------------
+if( $TAG == "HEAD" ) then
+     cvs -z3 co         GEOS_Web
+else
+     cvs -z3 co -r $TAG GEOS_Web
+     if(-e GEOS_Web/current_das_list ) /bin/rm GEOS_Web/current_das_list
+     if(-e GEOS_Web/archive_das_list ) /bin/rm GEOS_Web/archive_das_list
+     cvs -z3 co         GEOS_Web/current_das_list
+     cvs -z3 co         GEOS_Web/archive_das_list
+endif
+
+
+# Copy/Move Old Tag Info to New Experiment
+# ----------------------------------------
+if( $new == "true" ) then
+   /bin/mv    GEOS_Web   $1
+
+                            set color = "#707070"
+if( $LOGNAME == "todling" ) set color = "darkred"
+if( $LOGNAME == "bzhang"  ) set color = "#e62b86"
+if( $LOGNAME == "wgu"     ) set color = "darkgreen"
+if( $LOGNAME == "dasilva" ) set color = "#808000"
+if( $LOGNAME == "eliu"    ) set color = "#002809"
+if( $LOGNAME == "nbrubake") set color = "#00A8EC"
+if( $LOGNAME == "jguo"    ) set color = "#00A9A4"
+if( $LOGNAME == "yzhu"    ) set color = "#008531"
+if( $LOGNAME == "ryang"   ) set color = "#E7573B"
+
+# Set Default IDNAME (on alta)
+# ----------------------------
+                             set IDNAME = $LOGNAME
+if( $LOGNAME == "todling"  ) set IDNAME = "rtodling"
+
+cd $1
+if( -e sedfile  ) /bin/rm  sedfile
+if( -e exp_item ) /bin/rm  exp_item
+cat >    sedfile << EOF
+s?EXPID?$1?g
+s?LOGNAME?$LOGNAME?g
+s?RESOLUTION?$rslv?g
+s?IDNAME?$IDNAME?g
+s?CONTROL?$cntl?g
+s?DATE?$date?g
+s?DESCRIPTION?$desc?g
+s?COLOR?$color?g
+s?TAG?$dastag?g
+EOF
+sed -f sedfile exp_item.template2 > exp_item
+
+/bin/mv current_das_list current_tmp
+/bin/mv archive_das_list archive_tmp
+cat exp_item current_tmp > current_das_list
+cat exp_item archive_tmp > archive_das_list
+/bin/rm sedfile
+/bin/rm exp_item
+/bin/rm current_tmp
+/bin/rm archive_tmp
+
+    echo $1 > expid
+    cvs commit -m "Update exp list" current_das_list archive_das_list
+    cvs tag    $1
+
+    if(`uname -n` == "alta" ) chgrp gsi      current_das_list archive_das_list
+    chmod g+r      current_das_list archive_das_list
+    /bin/cp        current_das_list archive_das_list ../
+
+else
+
+   /bin/cp -r GEOS_Web/* $1
+   /bin/rm -r GEOS_Web
+    cd $1
+    cvs tag -F $1
+
+endif
+
+touch regress_test
+mkdir $year
+cd ../

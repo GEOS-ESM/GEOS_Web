@@ -1,0 +1,14 @@
+<?php
+function set_type ($type) {
+$content = <<<EOF
+<select name="type" onChange="leapto(this.form)">
+EOF;
+echo $content;
+      set_item ( $type,"_MEAN" , "Mean"     );
+      set_item ( $type,"_STD"  , "Std.Dev." );
+$content = <<<EOF
+</select>
+EOF;
+echo $content;
+return; }
+?>

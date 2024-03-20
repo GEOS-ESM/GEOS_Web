@@ -1,0 +1,16 @@
+<?php
+function set_verification ($verification) {
+$content = <<<EOF
+<select name="verification" onChange="leapto(this.form)">
+EOF;
+echo $content;
+      set_item ( $verification,"MERRAero"  , "MERRA Aerosol Reanalysis Rel-2" );
+      set_item ( $verification,"merra"     , "MERRA-1 Reanalysis"       );
+      set_item ( $verification,"MERRA-2"   , "MERRA-2 Reanalysis"       );
+      set_exps ( $verification );
+$content = <<<EOF
+</select>
+EOF;
+echo $content;
+return; }
+?>

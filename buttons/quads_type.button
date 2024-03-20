@@ -1,0 +1,14 @@
+<?php
+function set_quads_type ($type) {
+$content = <<<EOF
+<select name="type" onChange="leapto(this.form)">
+EOF;
+echo $content;
+      set_item ( $type,"p"  , "Transient Waves"  );
+      set_item ( $type,"s" , "Stationary Waves" );
+$content = <<<EOF
+</select>
+EOF;
+echo $content;
+return; }
+?>

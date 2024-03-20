@@ -1,0 +1,13 @@
+<?php
+function set_corners ($corners) {
+$content = <<<EOF
+<select name="corners" onChange="leapto(this.form)">
+EOF;
+echo $content;
+      set_item ( $corners, "none" , "none" );
+$content = <<<EOF
+</select>
+EOF;
+echo $content;
+return; }
+?>
