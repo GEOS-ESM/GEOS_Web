@@ -1,6 +1,6 @@
-# Contributing to REPO
+# Contributing to GEOS_Web
 
-Contributing code to REPO should be done via a Pull Request to this repository.
+Contributing code to GEOS_Web should be done via a Pull Request to this repository.
 
 ## Contributor License Agreement (CLA)
 
