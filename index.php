@@ -55,7 +55,8 @@ while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
           $truncatedValue = strlen($value) > 30 ? substr($value, 0, 30) . '...' : $value;
           $html .= '<td><a href="expfront.php?expid=' . $value . '">' . $truncatedValue . '</a></td>';
         } elseif ($key === "UserID" || $key === "Resolution") {
-          $html .= '<td><a href="index.php?' . $key . '=' . $value . '">' . $value . '</a></td>';
+          $qstr = $_SERVER["QUERY_STRING"];
+          $html .= '<td><a href="index.php?' . $key . '=' . $value . '&' . $qstr . '">' . $value . '</a></td>';
         } else {
           $html .= '<td>' . $value . '</td>';
         }
