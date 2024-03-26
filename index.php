@@ -28,6 +28,8 @@ if ($whereClause !== '') {
     $query .= ' WHERE' . $whereClause;
 }
 
+$query .= ' ORDER BY Date DESC';
+
 // Query the database table
 $result = $db->query($query);
 
