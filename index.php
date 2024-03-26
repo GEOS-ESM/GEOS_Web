@@ -87,18 +87,26 @@ $db->close();
         }
 
         th {
+	    position: sticky;
+	    top: 0px;
             background-color: #f2f2f2;
         }
+
+	footer {
+	    position: sticky; 
+	    bottom: 0px; 
+	    background-color: #f2f2f2;
+	}
     </style>
 </head>
 
 <body>
   <h1>GMAO GEOS Model Development</h1>
-  <a href="index.php">Clear filtering</a>
+  <h3><a href="index.php">Clear filtering</a></h3>
   <?php echo $html; ?>
 
   <footer>
-    <a href="mailto:yury.vikhliaev@nasa.gov">Send email for support</a> 
+    <h3><a href="mailto:yury.vikhliaev@nasa.gov">Send email for support</a></h3>
   </footer>
 </body>
 </html>
