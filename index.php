@@ -91,9 +91,14 @@ $db->close();
         }
     </style>
 </head>
+
 <body>
   <h1>GMAO GEOS Model Development</h1>
   <a href="index.php">Clear filtering</a>
   <?php echo $html; ?>
+
+  <footer>
+    <a href="mailto:yury.vikhliaev@nasa.gov">Send email for support</a> 
+  </footer>
 </body>
 </html>
