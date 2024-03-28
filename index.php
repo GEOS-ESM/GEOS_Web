@@ -2,7 +2,7 @@
 
 <?php
 // Connect to the SQLite3 database
-$db = new SQLite3('../experiments.db');
+$db = new SQLite3('../modeling/experiments.db');
 
 // Get the filtering criteria from the GET parameters
 $filterUserId = isset($_GET['UserID']) ? $_GET['UserID'] : null;
@@ -104,7 +104,12 @@ $db->close();
 
 <body>
   <h1>GMAO GEOS Model Development</h1>
-  <h3><a href="index.php">Clear filtering</a></h3>
+
+  <nav>
+    <a href="index.php">Clear Filtering</a> | 
+    <a href="add_record.php" target="_blank">Add Experiment</a> | 
+  </nav>
+
   <?php echo $html; ?>
 
   <footer>
