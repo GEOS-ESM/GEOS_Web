@@ -105,9 +105,9 @@ $db->close();
 <body>
   <h1>GMAO GEOS Model Development</h1>
 
-  <nav>
-    <a href="index.php">Clear Filtering</a> | 
-    <a href="add_record.php" target="_blank">Add Experiment</a> | 
+  <nav role="navigation">
+    <button id="addExperimentBtn">Add Experiment</button>
+    <button id="clearFiltersBtn">Clear Filters</button>
   </nav>
 
   <?php echo $html; ?>
@@ -115,5 +115,15 @@ $db->close();
   <footer>
     <h3><a href="mailto:yury.vikhliaev@nasa.gov">Send email for support</a></h3>
   </footer>
+
+  <script>
+    document.getElementById('addExperimentBtn').addEventListener('click', function() {
+      window.open('add_record.php', '_self');
+    });
+    
+    document.getElementById('clearFiltersBtn').addEventListener('click', function() {
+      window.location.href = '.';
+    });
+  </script>
 </body>
 </html>
