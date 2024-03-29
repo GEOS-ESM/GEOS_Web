@@ -55,7 +55,12 @@ while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
     foreach ($row as $key => $value) {
         if($key === "ExpID" || $key === "CmpID"){
           $truncatedValue = strlen($value) > 30 ? substr($value, 0, 30) . '...' : $value;
-          $html .= '<td><a href="expfront.php?expid=' . $value . '">' . $truncatedValue . '</a></td>';
+          $html .= '<td>';
+          if ($key === "ExpID") {
+            $html .= ' <button onclick="deleteRecord(\'' . $value . '\')">Delete</button>' . ' ';
+          }
+          $html .= '<a href="expfront.php?expid=' . $value . '">' . $truncatedValue . '</a>';
+          $html .= '</td>';
         } elseif ($key === "UserID" || $key === "Resolution") {
           $qstr = $_SERVER["QUERY_STRING"];
           $html .= '<td><a href="index.php?' . $key . '=' . $value . '&' . $qstr . '">' . $value . '</a></td>';
@@ -124,6 +129,22 @@ $db->close();
     document.getElementById('clearFiltersBtn').addEventListener('click', function() {
       window.location.href = '.';
     });
+
+    function deleteRecord(expId) {
+      if (confirm("Are you sure you want to delete experiment with ID: " + expId + "?")) {
+        // Send an AJAX request to delete the record
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", "delete_record.php", true);
+        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+        xhr.onreadystatechange = function() {
+        if (xhr.readyState === 4 && xhr.status === 200) {
+          // Reload the page after successful deletion
+          location.reload();
+        }
+      };
+      xhr.send("expid=" + encodeURIComponent(expId));
+      }
+    }
   </script>
 </body>
 </html>
