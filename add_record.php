@@ -37,6 +37,16 @@
       <label for="description">Description:</label>
       <input type="text" id="description" name="description"><br>
       <input type="submit" value="Submit">
+      <button type="button" id="cancelBtn">Cancel</button>
     </form>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('cancelBtn').addEventListener('click', function() {
+                document.querySelector('form').reset();
+                window.location.href = 'index.php';
+            });
+        });
+    </script>
 </body>
 </html>
