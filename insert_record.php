@@ -12,7 +12,8 @@ $cmp_id = isset($_POST['cmp_id']) ? $db->escapeString($_POST['cmp_id']) : '';
 $description = isset($_POST['description']) ? $db->escapeString($_POST['description']) : '';
 
 // Prepare the SQL INSERT statement
-$sql = "INSERT INTO experiments (ExpID, UserID, Resolution, Date, CmpID, Description) VALUES ('$exp_id', '$user_id', '$resolution', '$date', '$cmp_id', '$description')";
+$sql = "INSERT INTO experiments (ExpID, UserID, Resolution, Date, CmpID, Description) 
+        VALUES ('$exp_id', '$user_id', '$resolution', '$date', '$cmp_id', '$description')";
 
 // Execute the SQL statement
 $result = $db->exec($sql);
