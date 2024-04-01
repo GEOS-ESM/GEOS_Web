@@ -2,7 +2,7 @@
 
 <?php
 // Connect to the SQLite3 database
-$db = new SQLite3('../experiments.db');
+$db = new SQLite3('../modeling/experiments.db');
 
 // Get the filtering criteria from the GET parameters
 $filterUserId = isset($_GET['UserID']) ? $_GET['UserID'] : null;
@@ -27,6 +27,8 @@ if ($filterResolution !== null) {
 if ($whereClause !== '') {
     $query .= ' WHERE' . $whereClause;
 }
+
+$query .= ' ORDER BY Date DESC';
 
 // Query the database table
 $result = $db->query($query);
@@ -53,7 +55,12 @@ while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
     foreach ($row as $key => $value) {
         if($key === "ExpID" || $key === "CmpID"){
           $truncatedValue = strlen($value) > 30 ? substr($value, 0, 30) . '...' : $value;
-          $html .= '<td><a href="expfront.php?expid=' . $value . '">' . $truncatedValue . '</a></td>';
+          $html .= '<td>';
+          if ($key === "ExpID") {
+            $html .= ' <button onclick="deleteRecord(\'' . $value . '\')">Delete</button>' . ' ';
+          }
+          $html .= '<a href="expfront.php?expid=' . $value . '">' . $truncatedValue . '</a>';
+          $html .= '</td>';
         } elseif ($key === "UserID" || $key === "Resolution") {
           $qstr = $_SERVER["QUERY_STRING"];
           $html .= '<td><a href="index.php?' . $key . '=' . $value . '&' . $qstr . '">' . $value . '</a></td>';
@@ -102,11 +109,42 @@ $db->close();
 
 <body>
   <h1>GMAO GEOS Model Development</h1>
-  <h3><a href="index.php">Clear filtering</a></h3>
+
+  <nav role="navigation">
+    <button id="addExperimentBtn">Add Experiment</button>
+    <button id="clearFiltersBtn">Clear Filters</button>
+  </nav>
+
   <?php echo $html; ?>
 
   <footer>
     <h3><a href="mailto:yury.vikhliaev@nasa.gov">Send email for support</a></h3>
   </footer>
+
+  <script>
+    document.getElementById('addExperimentBtn').addEventListener('click', function() {
+      window.open('add_record.php', '_self');
+    });
+    
+    document.getElementById('clearFiltersBtn').addEventListener('click', function() {
+      window.location.href = '.';
+    });
+
+    function deleteRecord(expId) {
+      if (confirm("Are you sure you want to delete experiment with ID: " + expId + "?")) {
+        // Send an AJAX request to delete the record
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", "delete_record.php", true);
+        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+        xhr.onreadystatechange = function() {
+        if (xhr.readyState === 4 && xhr.status === 200) {
+          // Reload the page after successful deletion
+          location.reload();
+        }
+      };
+      xhr.send("expid=" + encodeURIComponent(expId));
+      }
+    }
+  </script>
 </body>
 </html>
